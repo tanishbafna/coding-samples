@@ -1,3 +1,16 @@
+# This script performs comprehensive preprocessing and merging of various demographic, economic, 
+# and health-related datasets to facilitate data analysis on factors influencing drug overdose rates 
+# in the United States.
+
+# - Reads and preprocesses demographic data (age, sex, race), political data (House of Representatives, 
+#   voting patterns), economic data (income levels, poverty rates, unemployment rates), health data 
+#   (opioid dispensing rates, overdose death rates), and law enforcement data.
+# - Standardizes and formats FIPS codes across datasets to ensure consistent identifiers for geographic locations.
+# - Merges multiple datasets on county-level FIPS codes to create a unified database that includes a wide 
+#   range of variables potentially relevant for modeling and analysis.
+
+# Highlights: pandas, data preprocessing, data merging, data cleaning
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm

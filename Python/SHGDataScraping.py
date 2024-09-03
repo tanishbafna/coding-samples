@@ -1,3 +1,9 @@
+# This script is designed to scrape and process village-level data on Self-Help Groups from
+# (https://nrlm.gov.in/shgOuterReports.do?methodName=showShgreport) and save it into structured CSV
+# files. The process involves reading hierarchical web pages representing different administrative 
+# levels (state, district, block, and grampanchayat) and then using `requests` and `BeautifulSoup4`
+# to extract group level characteristics.
+
 import os
 import re
 import json

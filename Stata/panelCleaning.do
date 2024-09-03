@@ -1,3 +1,10 @@
+// This script cleans and merges 4 survey datasets: People of India, Aspirational India, Income and
+// Expenses (CMIE). It imports the data, drops unwanted observations, declares missing values,
+// creates new variables, and puts everything together in a panel format for further analysis.
+
+// Highlights: Data Cleaning, Panel Data
+
+clear all
 cd "RA/Data"
 
 * ------- POI ------- *
@@ -6,7 +13,6 @@ import delimited "./POI/people_of_india_20190901_20191231_R.csv"
 
 
 // Dropping and Declaring Missing Values/Variables
-
 quietly drop if response_status != "Accepted" | member_status != "Member of the household" | age_yrs < 15
 
 foreach var of varlist _all {
@@ -23,7 +29,6 @@ foreach var of varlist time* {
 
 
 // Creating New Variables and Binaries
-
 tostring hh_id, gen(str_hh_id)
 tostring mem_id, gen(str_mem_id) 
 gen str20 personal_id = str_hh_id + "_" + str_mem_id
@@ -73,9 +78,7 @@ gen time_spent_on_self = 24.00 - time_spent_on_work_for_employer - time_spent_on
 rename time_spent_on_work_for_employer time_spent_on_work
 rename time_spent_on_work_for_hh_and_me time_spent_on_hh
 
-
 // Save Checkpoint
-
 sort psu_id personal_id 
 save "./Analysis/POI_Checkpoint.dta", replace
 clear
@@ -83,9 +86,7 @@ clear
 * ------- Caste Rank ------- *
 use "./Analysis/POI_Checkpoint.dta"
 
-
 // Pivot Table
-
 egen caste_psu_ = count(personal_id), by(psu_id caste_category)
 
 sort psu_id caste_category
@@ -106,7 +107,6 @@ foreach var of varlist caste* {
 gen total_people = caste_psu_UPPER_CASTE + caste_psu_INTERMEDIATE_CASTE + caste_psu_OBC + caste_psu_SC + caste_psu_ST
 
 // Caste Rank
-
 gen caste_rank_UPPER_CASTE = 0
 gen caste_rank_INTERMEDIATE_CASTE = (caste_psu_UPPER_CASTE) / total_people
 gen caste_rank_OBC = (caste_psu_UPPER_CASTE + caste_psu_INTERMEDIATE_CASTE) / total_people
@@ -114,7 +114,6 @@ gen caste_rank_SC = (caste_psu_UPPER_CASTE + caste_psu_INTERMEDIATE_CASTE + cast
 gen caste_rank_ST = (caste_psu_UPPER_CASTE + caste_psu_INTERMEDIATE_CASTE + caste_psu_OBC + caste_psu_SC) / total_people
 
 // Reshape for Merging
-
 keep psu_id caste_rank_UPPER_CASTE caste_rank_INTERMEDIATE_CASTE caste_rank_OBC caste_rank_SC caste_rank_ST
 reshape long caste_rank_, i(psu_id) j(caste_category, string)
 rename caste_rank_ caste_rank
@@ -123,7 +122,6 @@ replace caste_category = "Intermediate Caste" if caste_category == "INTERMEDIATE
 replace caste_category = "Upper Caste" if caste_category == "UPPER_CASTE"
 
 // Save Checkpoint
-
 save "./Analysis/Caste_Checkpoint.dta", replace
 clear
 
@@ -131,15 +129,12 @@ clear
 
 use "./Analysis/Caste_Checkpoint.dta"
 
-
 // Merge with POI
-
 merge 1:m psu_id caste_category using "./Analysis/POI_Checkpoint.dta"
 drop if _merge == 1
 drop _merge
 
 // Save Checkpoint
-
 sort psu_id personal_id 
 save "./Analysis/2019_POI_Caste.dta", replace
 clear
@@ -147,7 +142,6 @@ clear
 * ------- Income ------- *
 
 // Preprocessing monthly data
-
 local i = 9
 
 foreach var in "20190930" "20191031" "20191130" "20191231" {
@@ -175,7 +169,6 @@ foreach var in "20190930" "20191031" "20191130" "20191231" {
 }
 
 // Appending monthly data
-
 use "./Income/20190930_reduced.dta"
 append using "./Income/20191031_reduced.dta" "./Income/20191130_reduced.dta" "./Income/20191231_reduced.dta"
 
@@ -187,7 +180,6 @@ bysort hh_id (month): keep if _n == _N
 drop total_income income_adj_weight_hh month
 
 // Save Checkpoint
-
 sort hh_id 
 save "./Analysis/Income_Checkpoint.dta", replace
 clear
@@ -198,20 +190,18 @@ use "./Analysis/Income_Checkpoint.dta"
 
 
 // Merge with POI Caste
-
 merge 1:m hh_id using "./Analysis/2019_POI_Caste.dta"
 drop if _merge == 1
 drop _merge
 
 // Save Checkpoint
-
 sort psu_id personal_id 
 save "./Analysis/2019_POI_Caste_Income.dta", replace
 clear
 
 * ------- CP Expenses ------- *
-// Preprocessing monthly data
 
+// Preprocessing monthly data
 local i = 9
 
 foreach var in "20190930" "20191031" "20191130" "20191231" {
@@ -238,7 +228,6 @@ foreach var in "20190930" "20191031" "20191130" "20191231" {
 }
 
 // Appending monthly data
-
 use "./CP/20190930_reduced.dta"
 append using "./CP/20191031_reduced.dta" "./CP/20191130_reduced.dta" "./CP/20191231_reduced.dta"
 
@@ -251,7 +240,6 @@ bysort hh_id (month): keep if _n == _N
 drop total_expenditure expense_adj_weight_hh month monthly_expense_on_house_rent
 
 // Save Checkpoint
-
 sort hh_id 
 save "./Analysis/Expense_Checkpoint.dta", replace
 clear
@@ -262,13 +250,11 @@ use "./Analysis/Expense_Checkpoint.dta"
 
 
 // Merge with POI Caste Income
-
 merge 1:m hh_id using "./Analysis/2019_POI_Caste_Income.dta"
 drop if _merge == 1
 drop _merge
 
 // Save Checkpoint
-
 sort psu_id personal_id 
 save "./Analysis/2019_POI_Caste_Income_Expense.dta", replace
 clear
@@ -278,7 +264,6 @@ import delimited "./Aspirational/aspirational_india_20190901_20191231_R.csv"
 
 
 // Preprocessing data
-
 quietly drop if response_status != "Accepted"
 
 foreach subvar of varlist _all {
@@ -295,7 +280,6 @@ foreach var in age_group education_group gender_group income_group air_condition
 }
 
 // Creating Variables
-
 gen hh_real_estate = 1 if has_saved_in_real_estate == "Y" | has_outstanding_saving_in_real_e == "Y"
 replace hh_real_estate = 0 if hh_real_estate == . & has_saved_in_real_estate == "N" & has_outstanding_saving_in_real_e == "N"
 drop  has_saved_in_real_estate has_outstanding_saving_in_real_e
@@ -321,7 +305,6 @@ gen hh_weekly_water_hrs = water_availability_in_days_per_w * water_availability_
 drop water_availability_in_days_per_w water_availability_in_hours_per_ has_access_to_electricity has_access_to_water_in_house
 
 // Save Checkpoint
-
 sort hh_id
 save "./Analysis/Aspirational_Checkpoint.dta", replace
 clear
@@ -331,23 +314,19 @@ use "./Analysis/Aspirational_Checkpoint.dta"
 
 
 // Merge with POI Caste Income Expense
-
 merge 1:m hh_id using "./Analysis/2019_POI_Caste_Income_Expense.dta"
 drop if _merge == 1
 drop _merge
 
 // Land Ownership
-
 gen hh_extra_land_owned = 1 if (hh_real_estate == 1 & hh_houses_owned > 1 & hh_monthly_rent_expense == 0) | (hh_real_estate == 1 & hh_houses_owned > 0 & hh_monthly_rent_expense > 0) | (hh_owns_farm == 1)
 replace hh_extra_land_owned = 0 if hh_extra_land_owned == .
 drop hh_monthly_rent_expense
 
 // Rearrange
-
 order wave_no month_slot personal_id hh_id mem_id psu_id state district poi_adj_weight_mem income_adj_avg_weight_hh expense_adj_avg_weight_hh aspirational_adj_weight_hh religion caste_category caste caste_rank relation_with_hoh age_yrs education employment_status employment_arrangement industry_of_occupation nature_of_occupation occupation female rural literacy married currently_employed self_employed labour_force time_spent_on_work time_spent_on_hh time_spent_on_self time_spent_on_learning agricultural_work owns_farm has_bank_ac has_creditcard has_kisan_creditcard has_mobile hh_age_group hh_income_group hh_income_group_ceil hh_education_group hh_gender_group hh_monthly_income hh_monthly_expense hh_has_outstanding_borrowing hh_borrowed_from_bank hh_borrowed_from_money_lender hh_borrowed_from_employer hh_borrowed_from_rel_friends hh_borrowed_from_nbfc_dealer hh_borrowed_from_shg hh_borrowed_from_mfi hh_borrowed_from_chitfunds hh_borrowed_from_credit_cards hh_borrowed_from_shops hh_borrowed_from_other_sources hh_extra_land_owned hh_owns_farm hh_cattle_owned hh_tractors_owned hh_real_estate hh_houses_owned hh_refrigerators_owned hh_air_conditioners_owned hh_coolers_owned hh_washing_machines_owned hh_televisions_owned hh_computers_owned hh_cars_owned hh_two_wheelers_owned hh_genset_inverters_owned hh_daily_electricity_hrs hh_weekly_water_hrs
 
 // Save Checkpoint
-
 sort psu_id personal_id 
 save "./Analysis/2019_POI_Caste_Income_Expense_Aspirational.dta", replace
 clear
@@ -379,8 +358,10 @@ drop if dup>1
 
 keep wave_no month_slot hh_id psu_id state district aspirational_adj_weight_hh income_adj_avg_weight_hh expense_adj_avg_weight_hh religion caste caste_category rural hh_age_group hh_income_group hh_income_group_ceil hh_education_group hh_gender_group hh_monthly_income hh_monthly_expense hh_has_outstanding_borrowing hh_borrowed_from_bank hh_borrowed_from_money_lender hh_borrowed_from_employer hh_borrowed_from_rel_friends hh_borrowed_from_nbfc_dealer hh_borrowed_from_shg hh_borrowed_from_mfi hh_borrowed_from_chitfunds hh_borrowed_from_credit_cards hh_borrowed_from_shops hh_borrowed_from_other_sources hh_extra_land_owned hh_owns_farm hh_cattle_owned hh_tractors_owned hh_real_estate hh_houses_owned hh_refrigerators_owned hh_air_conditioners_owned hh_coolers_owned hh_washing_machines_owned hh_televisions_owned hh_computers_owned hh_cars_owned hh_two_wheelers_owned hh_genset_inverters_owned hh_daily_electricity_hrs hh_weekly_water_hrs
 
-// Save Checkpoint
+// Declare Panel
+xtset hh_id wave_no
 
+// Save Checkpoint
 sort psu_id hh_id 
 save "./Analysis/HH_2019_POI_Caste_Income_Expense_Aspirational.dta", replace
 clear

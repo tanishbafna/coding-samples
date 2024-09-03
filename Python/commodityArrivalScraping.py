@@ -1,3 +1,8 @@
+# This script is intended to automate the web scraping of commodity arrival data from a dynamic web
+# interface (https://agmarknet.gov.in). It uses a combination of Selenium and multiprocessing to
+# efficiently extract data from the web pages, processes it into structured formats, and saves it
+# in CSV files.
+
 # Scraping Libraries
 from urllib.parse import urlencode
 from selenium import webdriver
@@ -19,7 +24,7 @@ from multiprocessing import Pool
 
 warnings.filterwarnings('ignore', category=DeprecationWarning) 
 
-#================================
+#--------------------------------
 
 # Configuration
 config = json.load(open('config.json'))
@@ -33,7 +38,7 @@ chromedriverLocation = config['chromedriverLocation']
 processingDirectory = config['q']['directories']['processing']
 rawDirectory = config['q']['directories']['raw']
 
-#================================
+#--------------------------------
 
 sdate_str = sdate.strftime('%d-%b-%Y')
 edate_str = edate.strftime('%d-%b-%Y')
@@ -42,7 +47,7 @@ locations = json.load(open(f'setup/base_data/locations_states.json'))
 stateReport = json.load(open(f'{processingDirectory}/stateReport.json'))
 stateMapping = {locations[k]['name']:k for k in locations.keys()}
 
-#================================
+#--------------------------------
 
 options_chrome = Options()
 options_chrome.headless = True
@@ -54,7 +59,7 @@ options_chrome.add_argument('--disable-dev-shm-usage')
 
 URL = '' # Redacted
 
-#================================
+#--------------------------------
 
 def scrape(splitTup):
 
@@ -68,7 +73,7 @@ def scrape(splitTup):
     
     errors = {}
 
-    #===============
+    #---------------
 
     for ccode in tqdm(commodityArr, position=tqdmPosition+1, leave=False, desc=f'Commodity Pool {tqdmPosition+1}'):
         
@@ -98,7 +103,7 @@ def scrape(splitTup):
                     stateData = []
                     browser.get(customURL)
 
-                    #===============
+                    #---------------
 
                     try:
                         WebDriverWait(browser, 60).until(ec.visibility_of_element_located((By.XPATH, '//*[@id="middlepnl"]/h1')))
@@ -119,7 +124,7 @@ def scrape(splitTup):
                         browser = webdriver.Chrome(chromedriverLocation, options=options_chrome)
                         continue
                 
-                    #===============
+                    #---------------
 
                     # Click State Level Plus Sign
                     try:
@@ -134,7 +139,7 @@ def scrape(splitTup):
 
                         continue
                 
-                    #===============
+                    #---------------
 
                     # Capture District Table
                     dTableHtml = '<table>' + browser.find_element(By.ID, 'cphBody_GridArrivalData_gvOrders_0').get_attribute('innerHTML') + '</table>'
@@ -152,7 +157,7 @@ def scrape(splitTup):
                             forLoopErr = 'District Button Press Error'
                             break
                         
-                        #===============
+                        #---------------
 
                         # Wait for Market Level Table
                         try:
@@ -178,7 +183,7 @@ def scrape(splitTup):
 
                         stateData.append(mDF)
 
-                        #===============
+                        #---------------
                     
                     if forLoopErr != '':
 
@@ -190,7 +195,7 @@ def scrape(splitTup):
                         
                         continue
                     
-                    #===============
+                    #---------------
 
                     data += stateData
                     commodityErrors["states"].remove(state)
@@ -219,7 +224,7 @@ def scrape(splitTup):
 
     return errors
 
-#================================
+#--------------------------------
 
 if __name__ == '__main__':
 
@@ -239,7 +244,7 @@ if __name__ == '__main__':
             allErrors.update(returnValue)
             pbar.update()
     
-    #===============
+    #---------------
 
     popKeys = []
     for key, err in allErrors.items():
@@ -249,7 +254,7 @@ if __name__ == '__main__':
     for key in popKeys:
         allErrors.pop(key)
     
-    #===============
+    #---------------
 
     with open(f'q/2-reruns.json', 'w') as file:
         json.dump(allErrors, file, indent=2)

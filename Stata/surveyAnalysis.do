@@ -1,3 +1,11 @@
+// This script performs a series of econometric analysis of income, employment, and social
+// characteristics using CMIE (aspirations, income and expenses survey). The analysis focuses on
+// variables such as education, caste, religion, labor force participation, and time use, employing
+// T-tests, summary statistics, regression models with survey weights to explore the relationships
+// among these factors. The script also generates LaTeX tables for all the results.
+
+// Highlights: Survey Data Analysis
+
 clear
 cd "/Users/tanishbafna/Desktop/RA/Data"
 use "./Analysis/18_2019_POI_Income_Expense_Aspirational_Soil.dta"

@@ -1,3 +1,8 @@
+// This script creates generate descriptive statistics and matrices for different types of
+// variables, saving them in a LaTeX format suitable for publication.
+
+// Highlights: Summary Statistics, LaTeX Output
+
 clear all
 global homePath "home/tanish.bafna_asp23"
 global storagePath "storage/tanish.bafna_asp23"

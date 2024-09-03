@@ -1,3 +1,12 @@
+# This script is used to clean scraped textual data and standardize it for further analysis.
+
+# - Normalization of Unicode characters and removal of HTML tags to ensure text purity.
+# - Advanced regex operations to eliminate unwanted stopwords, abbreviations, and specific terms related to organizations and locations.
+# - Substitution of words and phrases based on predefined mappings, which help standardize variations of text expressions.
+# - Batch processing of data chunks in parallel to enhance performance.
+
+# Highlights: pandas, RegEx, NLTK, Multiprocessing
+
 # Data Libraries
 import numpy as np
 import pandas as pd
@@ -154,12 +163,12 @@ def mainCleaning(df):
 
 if __name__ == '__main__':
 
-    for file in tqdm(sorted([x for x in os.listdir('raw_data/surveyData_chunks') if x.endswith('.dta')]), position=0, desc='Data Chunks'):
+    for file in tqdm(sorted([x for x in os.listdir('raw_data/scrapedData_chunks') if x.endswith('.dta')]), position=0, desc='Data Chunks'):
 
         num = int(file.replace('.dta', ''))
 
         # Load data
-        raw = pd.read_stata(f'raw_data/surveyData_chunks/{file}', columns=['uniqueId', 'name', 'desc'])
+        raw = pd.read_stata(f'raw_data/scrapedData_chunks/{file}', columns=['uniqueId', 'name', 'desc'])
         raw.sort_values(by=['uniqueId'], inplace=True, ignore_index=True)
         raw['desc'] = raw['desc'].astype(str)
 

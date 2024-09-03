@@ -1,3 +1,9 @@
+// This script performs a series of econometric analyses to examine the relationship between real
+// wages and emerging technologies using regression models with various fixed effects
+// specifications and controls. The script also generates LaTeX tables for the regression results.
+
+// Highlights: Interacting Fixed Effect, LaTeX Output
+
 clear all
 global homePath "home/tanish.bafna_asp23"
 global storagePath "storage/tanish.bafna_asp23"
