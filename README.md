@@ -87,9 +87,15 @@ This script leverages a transformer-based model for few-shot named entity recogn
 
 **Highlights: Hugging Face, text generation, GPU acceleration, error handling**
 
+### [Can Special Token Augmentation Break the Reversal Curse?](https://github.com/JaiDoshi/reversing-reversal-curse/tree/main)
+
+**Highlights: Fine-tuning LLMs and evaluating results of a text generation task.**
+
 ### [Going Bayesian: A Multi-class Classification Comparison of Logistic Regression, ANNs and Bayesian Neural Networks](https://github.com/tanishbafna/Going-Bayesian)
 
 This project explores the performance of different machine learning models on a multi-class classification problem. The analysis compares the performance of traditional logistic regression, artificial neural networks (ANNs), and Bayesian neural networks (BNNs) on the MNIST dataset. The project aims to evaluate the classification accuracy and uncertainty estimation capabilities of these models.
+
+**Highlights: Bayesian Neural Networks, Multi-class Classification**
 
 ## Python (Web Scraping)
 
